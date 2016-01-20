@@ -49,8 +49,9 @@ public class WallpaperFlashView extends View {
     int padding_right;
     int padding_top;
     int width;
-    private Rect mBgColorRect;
     int height;
+    private Rect mBgColorRect;
+
     private boolean isFlash = false;
     private boolean isUp = true;
     private long startTime = 0L;

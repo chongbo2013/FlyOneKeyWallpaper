@@ -7,16 +7,22 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
 
 /**
  * Created by ferris on 2016/1/19.
  */
 public class OneKeyWallpaperView extends View  implements ValueAnimator.AnimatorUpdateListener {
-    Bitmap widget_wallpaper_wave_mask, widget_wallpaper_wave_bg, widget_wallpaper_wave, srcwave;
+    Bitmap  widget_wallpaper_wave, srcwave;
+    Drawable widget_wallpaper_wave_bg,widget_wallpaper_wave_mask;
     int waveheight;
     int wavelength;
     int wavewidth;
@@ -24,10 +30,23 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
     Rect mWaveSrcRect;
     int waveColor;
     Paint mBgColorPaint;
-
+    Paint mPaint;
     ObjectAnimator mAnimator;
      int downProgress = 0;
      int progress = 0;
+
+    int padding_bottom;
+    int padding_left;
+    int padding_right;
+    int padding_top;
+    int width;
+    int height;
+
+     Rect mWaveRect=new Rect();
+     Rect mBgRect;
+     Rect mBgColorRect;
+     Rect mMaskRect;
+    Bitmap iconMask;
     public OneKeyWallpaperView(Context context) {
         super(context);
         init();
@@ -44,10 +63,34 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
         init();
     }
 
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        return drawableToBitmap(drawable, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+    }
+
+    public static Bitmap drawableToBitmap(Drawable drawable, int width, int height) {
+
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
+    }
+
 
     public void init() {
-        widget_wallpaper_wave_mask = BitmapFactory.decodeResource(this.getContext().getResources(), R.drawable.widget_wallpaper_wave_mask);
-        widget_wallpaper_wave_bg = BitmapFactory.decodeResource(this.getContext().getResources(), R.drawable.widget_wallpaper_wave_bg);
+        SizeUtils.reset(getContext());
+        mPaint = new Paint();
+        mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+        mPaint.setFilterBitmap(true);
+        mPaint.setDither(true);
+        widget_wallpaper_wave_mask = getResources().getDrawable(R.drawable.widget_wallpaper_wave_mask);
+        iconMask = BitmapFactory.decodeResource(this.getContext().getResources(), R.drawable.widget_wallpaper_wave_mask);
+        widget_wallpaper_wave_bg = getResources().getDrawable(R.drawable.widget_wallpaper_wave_bg) ;
         widget_wallpaper_wave = BitmapFactory.decodeResource(this.getContext().getResources(), R.drawable.widget_wallpaper_wave);
 
         //2倍宽度的水波
@@ -66,16 +109,19 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
 
         wavewidth = srcwave.getWidth();
         waveheight = srcwave.getHeight();
-        wavelength = (wavewidth / 7);
-        speed = (wavelength / 15);
 
-        mWaveSrcRect = new Rect(0, 0, this.wavelength, this.waveheight / 5);
+        wavelength = wavewidth / 7;
+
+        speed = (wavelength / 15);
+        mWaveSrcRect = new Rect(0, 0, this.wavelength, this.waveheight /2);
 
         //获取水波底部颜色
-        waveColor = this.srcwave.getPixel(this.srcwave.getWidth() / 2, 3 * this.srcwave.getHeight() / 4);
+        waveColor = this.srcwave.getPixel(this.srcwave.getWidth() / 2,  3 * this.srcwave.getHeight() / 4);
         mBgColorPaint = new Paint();
-        mBgColorPaint.setColor(this.waveColor);
+        mBgColorPaint.setColor(waveColor);
+
     }
+
 
     private float interpolate = 0f;
 
@@ -94,9 +140,10 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
         }
 
         mAnimator = ObjectAnimator.ofFloat(this, "interpolate", new float[]{0.0F, 1.0F});
-        mAnimator.setDuration(1000L);
-        mAnimator.setRepeatMode(Animation.REVERSE);
+        mAnimator.setDuration(2000L);
+        mAnimator.setRepeatMode(Animation.RESTART);
         mAnimator.setRepeatCount(Animation.INFINITE);
+        mAnimator.setInterpolator(new LinearInterpolator());
         mAnimator.addUpdateListener(this);
         mAnimator.start();
     }
@@ -104,7 +151,19 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        this.width = getWidth();
+        this.height = getHeight();
+        this.padding_left = ((this.width - SizeUtils.dip2px(38)) / 2);
+        this.padding_right = this.padding_left;
+        this.padding_top = ((this.height - SizeUtils.dip2px(58)) / 2);
+        this.padding_bottom = this.padding_top;
+        drawBackGroud(canvas);
+
+        drawBgColordrawMask(canvas);
+
     }
+
+
 
     /**
      * 0.0-- 1.0f
@@ -112,10 +171,47 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
      */
     @Override
     public void onAnimationUpdate(ValueAnimator animation) {
-            float offsetX=(wavelength/2)*getInterpolate();
-            float offsetY=0;
-            if(downProgress<progress){
 
-            }
+            int offsetX= (int)( (wavelength*7)*getInterpolate());
+            //画布位置
+            mWavedstRect = new Rect(padding_left, padding_top, width - padding_right,  height - padding_bottom);
+            //图片偏移位置
+            mWaveRect.set(mWaveSrcRect.left + offsetX, mWaveSrcRect.top, mWaveSrcRect.left + offsetX + mWaveSrcRect.width(), mWaveSrcRect.bottom);
+        invalidate();
     }
+
+    Rect mWavedstRect;
+
+    private void drawBackGroud(Canvas mCanvas) {
+        mBgRect= new Rect(padding_left, padding_top, width - padding_right, height - padding_bottom);
+        mCanvas.save();
+        mCanvas.clipRect(mBgRect);
+        widget_wallpaper_wave_mask.setBounds(mBgRect);
+        widget_wallpaper_wave_mask.draw(mCanvas);
+        widget_wallpaper_wave_bg.setBounds(mBgRect);
+        widget_wallpaper_wave_bg.draw(mCanvas);
+        mCanvas.restore();
+    }
+
+
+
+
+
+    private void drawBgColordrawMask(Canvas paramCanvas) {
+
+        int sc = paramCanvas.saveLayer(padding_left, padding_top, width - padding_right, height - padding_bottom, null,
+                Canvas.MATRIX_SAVE_FLAG | Canvas.CLIP_SAVE_FLAG
+                        | Canvas.HAS_ALPHA_LAYER_SAVE_FLAG
+                        | Canvas.FULL_COLOR_LAYER_SAVE_FLAG
+                        | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+
+        mWavedstRect.top=50;
+        paramCanvas.drawBitmap(srcwave, mWaveRect, mWavedstRect, null);
+        mBgColorRect = new Rect(this.padding_left, 100, this.width - this.padding_right, this.height - this.padding_bottom);
+        paramCanvas.drawRect(this.mBgColorRect, this.mBgColorPaint);
+        mMaskRect = new Rect(padding_left, padding_top, width - padding_right, height - padding_bottom);
+        paramCanvas.drawBitmap(this.iconMask, null, this.mMaskRect, this.mPaint);
+        paramCanvas.restoreToCount(sc);
+    }
+
 }

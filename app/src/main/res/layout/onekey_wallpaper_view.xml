@@ -7,12 +7,12 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="xu.ferris.flyonekeywallpaper.MainActivity">
+    >
 
     <xu.ferris.flyonekeywallpaper.OneKeyWallpaperView
         android:id="@+id/wallpaperFlashView"
         android:layout_width="58dp"
-        android:layout_height="58dp"
+        android:layout_height="68dp"
         android:visibility="visible"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
