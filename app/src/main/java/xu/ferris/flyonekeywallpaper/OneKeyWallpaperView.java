@@ -64,24 +64,6 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
         init();
     }
 
-    public static Bitmap drawableToBitmap(Drawable drawable) {
-        return drawableToBitmap(drawable, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
-    }
-
-    public static Bitmap drawableToBitmap(Drawable drawable, int width, int height) {
-
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable) drawable).getBitmap();
-        }
-
-        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        return bitmap;
-    }
-
 
     public void init() {
         SizeUtils.reset(getContext());
@@ -114,7 +96,7 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
         wavelength = wavewidth / 7;
 
         speed = (wavelength / 15);
-        mWaveSrcRect = new Rect(0, 0, this.wavelength, this.waveheight /2);
+        mWaveSrcRect = new Rect(0, 0, this.wavelength, this.waveheight /3);
 
         //获取水波底部颜色
         waveColor = this.srcwave.getPixel(this.srcwave.getWidth() / 2,  3 * this.srcwave.getHeight() / 4);
@@ -201,10 +183,17 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
                         | Canvas.HAS_ALPHA_LAYER_SAVE_FLAG
                         | Canvas.FULL_COLOR_LAYER_SAVE_FLAG
                         | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
+
+        //画水波
         mWavedstRect.top=50;
         paramCanvas.drawBitmap(srcwave, mWaveRect, mWavedstRect, null);
+
+
+        //画背景色
         mBgColorRect = new Rect(this.padding_left, 100, this.width - this.padding_right, this.height - this.padding_bottom);
         paramCanvas.drawRect(this.mBgColorRect, this.mBgColorPaint);
+
+        //画罩子
         mMaskRect = new Rect(padding_left, padding_top, width - padding_right, height - padding_bottom);
         paramCanvas.drawBitmap(this.iconMask, null, this.mMaskRect, this.mPaint);
         paramCanvas.restoreToCount(sc);

@@ -85,6 +85,7 @@ public class WallpaperFlashView extends View {
     }
 
     private void init() {
+        SizeUtils.reset(getContext());
         this.mPaint = new Paint();
         this.xfermode = new PorterDuffXfermode(PorterDuff.Mode.DST_IN);
         this.mPaint.setXfermode(this.xfermode);
@@ -148,9 +149,9 @@ public class WallpaperFlashView extends View {
         super.onDraw(canvas);
         this.width = getWidth();
         this.height = getHeight();
-        this.padding_left = ((this.width - this.bg1.getMinimumWidth()) / 2);
+        this.padding_left = ((this.width - SizeUtils.dip2px(38)) / 2);
         this.padding_right = this.padding_left;
-        this.padding_top = ((this.height - this.bg1.getMinimumHeight()) / 2);
+        this.padding_top = ((this.height - SizeUtils.dip2px(58)) / 2);
         this.padding_bottom = this.padding_top;
         refresh();
         drawBackGroud(canvas);
@@ -186,12 +187,13 @@ public class WallpaperFlashView extends View {
             }
 //        while (true) {
 //
-//            int i = (this.height - 2 * this.padding_bottom) / 3;
-//            int j = (int) (this.progress / 100.0F * (this.height - 2 * this.padding_bottom - i));
-//            int k = this.height - this.padding_bottom - i;
-//            int m = this.height - this.padding_bottom;
-//            this.mWaveRect = new Rect(this.padding_left, k - j, this.width - this.padding_right, m - j);
-//            this.mBgColorRect = new Rect(this.padding_left, this.mWaveRect.bottom, this.width - this.padding_right, j + this.mWaveRect.bottom);
+            int i = (this.height - 2 * this.padding_bottom) / 3;
+            int j = (int) (this.progress / 100.0F * (this.height - 2 * this.padding_bottom - i));
+            int k = this.height - this.padding_bottom - i;
+            int m = this.height - this.padding_bottom;
+            this.mWaveRect = new Rect(this.padding_left, k - j, this.width - this.padding_right, m - j);
+            this.mBgColorRect = new Rect(this.padding_left, this.mWaveRect.bottom, this.width - this.padding_right, j + this.mWaveRect.bottom);
+
 //            return;
 //
 //            if (this.progress < 90)
@@ -285,7 +287,7 @@ public class WallpaperFlashView extends View {
         WallpaperFlashView a;
         float b;
 
-        d(WallpaperFlashView paramWallpaperFlashView, float paramFloat) {
+        public d(WallpaperFlashView paramWallpaperFlashView, float paramFloat) {
             this.a = paramWallpaperFlashView;
             this.b = paramFloat;
         }
@@ -294,7 +296,7 @@ public class WallpaperFlashView extends View {
 //            WallpaperFlashView.access$4(this.a, (int)(100.0F * this.b));
 //            if (WallpaperFlashView.access$5(this.a) > 90)
 //                WallpaperFlashView.access$3(this.a, false);
-//            this.a.invalidate();
+            this.a.invalidate();
         }
     }
 
