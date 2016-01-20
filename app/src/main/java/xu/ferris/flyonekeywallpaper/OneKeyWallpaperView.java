@@ -47,6 +47,7 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
      Rect mBgColorRect;
      Rect mMaskRect;
     Bitmap iconMask;
+    Rect mWavedstRect;
     public OneKeyWallpaperView(Context context) {
         super(context);
         init();
@@ -177,10 +178,9 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
             mWavedstRect = new Rect(padding_left, padding_top, width - padding_right,  height - padding_bottom);
             //图片偏移位置
             mWaveRect.set(mWaveSrcRect.left + offsetX, mWaveSrcRect.top, mWaveSrcRect.left + offsetX + mWaveSrcRect.width(), mWaveSrcRect.bottom);
-        invalidate();
+            invalidate();
     }
 
-    Rect mWavedstRect;
 
     private void drawBackGroud(Canvas mCanvas) {
         mBgRect= new Rect(padding_left, padding_top, width - padding_right, height - padding_bottom);
@@ -195,16 +195,12 @@ public class OneKeyWallpaperView extends View  implements ValueAnimator.Animator
 
 
 
-
-
     private void drawBgColordrawMask(Canvas paramCanvas) {
-
         int sc = paramCanvas.saveLayer(padding_left, padding_top, width - padding_right, height - padding_bottom, null,
                 Canvas.MATRIX_SAVE_FLAG | Canvas.CLIP_SAVE_FLAG
                         | Canvas.HAS_ALPHA_LAYER_SAVE_FLAG
                         | Canvas.FULL_COLOR_LAYER_SAVE_FLAG
                         | Canvas.CLIP_TO_LAYER_SAVE_FLAG);
-
         mWavedstRect.top=50;
         paramCanvas.drawBitmap(srcwave, mWaveRect, mWavedstRect, null);
         mBgColorRect = new Rect(this.padding_left, 100, this.width - this.padding_right, this.height - this.padding_bottom);
